@@ -33,8 +33,7 @@
         <aside class="w-full md:w-64 space-y-8 bg-white p-6 rounded-xl shadow-sm h-fit">
             <div>
                 <h2 class="text-lg font-bold mb-4 border-b pb-2">Marcas</h2>
-                <div id="brand-filters" class="space-y-2">
-                    </div>
+                <div id="brand-filters" class="space-y-2"></div>
             </div>
 
             <div>
@@ -49,8 +48,7 @@
         </aside>
 
         <section class="flex-1">
-            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                </div>
+            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             
             <div id="no-products-message" class="hidden text-center py-20">
                 <p class="text-gray-500 text-xl">Nenhum produto encontrado com esses filtros.</p>
@@ -64,22 +62,28 @@
 
     <script type="text/javascript">
         let allProducts = [];
-        let storeConfig = {};
-        const API_URL = 'http://127.0.0.1:5000/api';
         
+        // --- CONFIGURAÇÃO DA LOJA ---
+        const WHATSAPP_LOJA = "5521999999999"; // <--- COLOQUE SEU NUMERO AQUI
+        
+        // --- CONFIGURAÇÃO SUPABASE ---
+        const SUPABASE_URL = 'https://oixxpvupokedqfetyarz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9peHhwdnVwb2tlZHFmZXR5YXJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyNDc0OTMsImV4cCI6MjA3ODgyMzQ5M30.rJthexTj2qtKPVQ2ogQrMHjFT-w0HmVlrq7JVMe6eQU';
+        // -----------------------------
+
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
         async function loadData() {
             try {
-                // Busca configurações (nome da loja, whatsapp)
-                const configResponse = await fetch(`${API_URL}/config`);
-                storeConfig = await configResponse.json();
-
-                // Busca produtos da API Flask que vem do Supabase
-                const productsResponse = await fetch(`${API_URL}/produtos`);
-                const data = await productsResponse.json();
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/produtos?select=*`, {
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`
+                    }
+                });
                 
-                // Trata IDs nulos para não quebrar o botão de compra
+                const data = await response.json();
+                
                 allProducts = data.map((p, index) => ({
                     ...p,
                     id: p.id !== null ? p.id : index
@@ -92,8 +96,8 @@
                 console.error('Erro:', error);
                 document.getElementById('products-grid').innerHTML = `
                     <div class="col-span-full p-8 bg-red-50 border border-red-200 rounded-xl text-center">
-                        <p class="text-red-600 font-bold">Erro de Conexão!</p>
-                        <p class="text-red-500 text-sm">Certifique-se que o Flask está rodando em http://127.0.0.1:5000</p>
+                        <p class="text-red-600 font-bold">Erro ao carregar produtos!</p>
+                        <p class="text-red-500 text-sm">Verifique a conexão com o banco de dados.</p>
                     </div>
                 `;
             }
@@ -129,7 +133,7 @@
             const selectedBrands = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(cb => cb.value);
 
             const filtered = allProducts.filter(p => {
-                const matchSearch = p.nome.toLowerCase().includes(searchTerm) || p.descricao.toLowerCase().includes(searchTerm);
+                const matchSearch = (p.nome || "").toLowerCase().includes(searchTerm) || (p.descricao || "").toLowerCase().includes(searchTerm);
                 const matchBrand = selectedBrands.length === 0 || selectedBrands.includes(p.marca);
                 const matchPrice = (p.preco || 0) <= maxPrice;
                 return matchSearch && matchBrand && matchPrice;
@@ -160,11 +164,11 @@
                     <div class="p-6 flex flex-col flex-grow">
                         <span class="text-[10px] uppercase font-black text-indigo-500 mb-1">${p.marca}</span>
                         <h3 class="font-bold text-lg text-gray-900 leading-tight mb-2">${p.nome}</h3>
-                        <p class="text-gray-500 text-xs line-clamp-3 italic flex-grow mb-4">"${p.descricao}"</p>
+                        <p class="text-gray-500 text-xs line-clamp-3 italic flex-grow mb-4">"${p.descricao || ''}"</p>
                         
                         <div class="border-t pt-4">
                             <span class="text-gray-400 text-[10px] block uppercase font-bold">Valor à vista</span>
-                            <span class="text-2xl font-black text-indigo-700">R$ ${p.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            <span class="text-2xl font-black text-indigo-700">R$ ${(p.preco || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                             
                             <button onclick="createWhatsappLink('${p.id}')" 
                                     class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
@@ -182,8 +186,7 @@
             const p = allProducts.find(prod => prod.id == id);
             if (!p) return;
             const msg = `*INTERESSE EM COMPRA - MI-PRIME-CELL*\n\nOlá! Gostaria de saber a disponibilidade do:\n📱 *${p.nome}*\n💰 Valor: R$ ${p.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n\nComo posso finalizar a reserva?`;
-            const phone = (storeConfig.numero_da_loja || "5521999999999").replace(/\D/g, '');
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            window.open(`https://wa.me/${WHATSAPP_LOJA}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function clearFilters() {
@@ -196,6 +199,3 @@
         }
 
         window.onload = loadData;
-    </script>
-</body>
-</html>

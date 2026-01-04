@@ -5,105 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MI-PRIME-CELL | Loja Oficial</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .product-card { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease; }
-        .product-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .product-card { transition: all 0.3s ease; }
+        .product-card:hover { transform: translateY(-8px); shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900">
+<body>
 
-    <header class="glass-header sticky top-0 z-50 border-b border-slate-200">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
-                    <span class="text-white font-black text-xl">M</span>
-                </div>
-                <h1 class="text-2xl font-extrabold tracking-tighter text-slate-800">MI-PRIME-CELL</h1>
-            </div>
-            <nav class="hidden md:flex gap-8 text-sm font-semibold text-slate-500">
-                <a href="#" class="hover:text-indigo-600 transition">iPhones</a>
-                <a href="#" class="hover:text-indigo-600 transition">Xiaomi</a>
-                <a href="#" class="hover:text-indigo-600 transition">Sobre</a>
-            </nav>
+            <h1 class="text-2xl font-black tracking-tighter text-indigo-600">MI-PRIME-CELL</h1>
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Premium Store</span>
         </div>
     </header>
 
-    <section class="bg-slate-900 py-16 text-center text-white px-6">
-        <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Tecnologia Premium na palma da sua mão</h2>
-        <p class="text-slate-400 max-w-2xl mx-auto text-lg">Os melhores modelos de iPhone e Xiaomi com garantia e o melhor preço do mercado.</p>
-    </section>
-
-    <main class="container mx-auto px-6 -mt-10 pb-20">
+    <main class="container mx-auto px-6 py-10">
         <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            <div class="col-span-full py-20 text-center">
-                <p class="text-slate-400 animate-pulse">Buscando as melhores ofertas...</p>
             </div>
-        </div>
     </main>
 
-    <footer class="border-t border-slate-200 py-10 text-center text-slate-400 text-sm">
-        <p>© 2024 MI-PRIME-CELL. Todos os direitos reservados.</p>
-    </footer>
-
     <script>
-        const WHATSAPP_LOJA = "5521999999999"; 
         const SUPABASE_URL = 'https://oixxpvupokedqfetyarz.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9peHhwdnVwb2tlZHFmZXR5YXJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyNDc0OTMsImV4cCI6MjA3ODgyMzQ5M30.rJthexTj2qtKPVQ2ogQrMHjFT-w0HmVlrq7JVMe6eQU';
 
-        async function loadData() {
+        async function loadProducts() {
+            const grid = document.getElementById('products-grid');
             try {
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/produtos?select=*`, {
                     headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
                 });
                 const data = await response.json();
-                
-                const grid = document.getElementById('products-grid');
                 grid.innerHTML = '';
 
                 data.forEach(p => {
-                    const precoNum = parseFloat(p.preco) || 0;
-                    const card = document.createElement('div');
-                    card.className = 'product-card bg-white rounded-3xl overflow-hidden border border-slate-100 flex flex-col';
-                    card.innerHTML = `
-                        <div class="relative h-64 bg-[#fcfcfc] p-8 flex items-center justify-center">
-                            <span class="absolute top-4 right-4 bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${p.marca || 'Original'}</span>
-                            <img src="${p.url_imagem}" class="h-full w-full object-contain" onerror="this.src='https://placehold.co/400x400?text=Produto';">
-                        </div>
-                        <div class="p-6 flex flex-col flex-grow">
-                            <h3 class="font-bold text-slate-800 text-lg mb-1 leading-tight">${p.nome}</h3>
-                            <p class="text-slate-400 text-xs line-clamp-2 mb-4 flex-grow">${p.descricao || 'Disponível para pronta entrega.'}</p>
-                            
-                            <div class="flex items-end justify-between mt-4">
-                                <div>
-                                    <span class="text-slate-400 text-[10px] block font-semibold uppercase">À vista</span>
-                                    <span class="text-2xl font-black text-indigo-600 tracking-tighter">
-                                        R$ ${precoNum.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
-                                    </span>
+                    const preco = parseFloat(p.preco) || 0;
+                    // Define a cor do selo baseada no status
+                    const isLacrado = p.status?.toLowerCase() === 'lacrado';
+                    const badgeColor = isLacrado ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700';
+
+                    grid.innerHTML += `
+                        <div class="product-card bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm flex flex-col h-full">
+                            <div class="relative h-60 bg-slate-50 p-6 flex items-center justify-center">
+                                <span class="absolute top-4 left-4 ${badgeColor} text-[10px] font-extrabold px-3 py-1 rounded-full uppercase">
+                                    ${p.status || 'Semi novo'}
+                                </span>
+                                <img src="${p.url_imagem}" class="h-full object-contain" onerror="this.src='https://placehold.co/400?text=Produto';">
+                            </div>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <h2 class="font-bold text-slate-800 text-lg mb-2">${p.nome}</h2>
+                                <p class="text-slate-500 text-xs mb-4 flex-grow line-clamp-2">${p.descricao || ''}</p>
+                                <div class="flex items-center justify-between mt-auto">
+                                    <div>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase">À vista</p>
+                                        <p class="text-xl font-black text-indigo-600">R$ ${preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                                    </div>
+                                    <button onclick="window.open('https://wa.me/5521999999999')" class="bg-slate-900 text-white p-3 rounded-2xl hover:bg-indigo-600 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </button>
                                 </div>
-                                <button onclick="buy('${p.nome}', ${precoNum})" class="bg-indigo-600 hover:bg-indigo-700 p-3 rounded-2xl text-white transition-colors shadow-lg shadow-indigo-100">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                </button>
                             </div>
                         </div>
                     `;
-                    grid.appendChild(card);
                 });
-            } catch (error) {
-                console.error("Erro:", error);
-            }
+            } catch (e) { console.error(e); }
         }
-
-        function buy(nome, preco) {
-            const msg = `Olá! Gostaria de consultar a disponibilidade do *${nome}* (R$ ${preco.toLocaleString('pt-BR')}).`;
-            window.open(`https://wa.me/${WHATSAPP_LOJA}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        window.onload = loadData;
+        window.onload = loadProducts;
     </script>
 </body>
 </html>

@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "nome": "Notebook Gamer Pro X",
+        "descricao": "Potência e performance para jogos de última geração.",
+        "preco": 7500.00,
+        "imagem_url": "http://127.0.0.1:5000/static/imagens/notebook.jpg"
+    },
+    {
+        "id": 2,
+        "nome": "Mouse Sem Fio Ultra",
+        "descricao": "Design ergonômico e bateria de longa duração.",
+        "preco": 150.99,
+        "imagem_url": "http://127.0.0.1:5000/static/imagens/mouse.jpg"
+    },
+    {
+        "id": 3,
+        "nome": "Teclado Mecânico RGB",
+        "descricao": "Switches táteis e iluminação personalizável.",
+        "preco": 499.50,
+        "imagem_url": "http://127.0.0.1:5000/static/imagens/teclado.jpg"
+    },
+    {
+        "id": 4,
+        "nome": "Monitor Ultrawide 34\"",
+        "descricao": "Experiência visual imersiva para trabalho e lazer.",
+        "preco": 2890.00,
+        "imagem_url": "http://127.0.0.1:5000/static/imagens/monitor.jpg"
+    }
+]

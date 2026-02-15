@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSDev E-commerce - Loja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .header {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-add-cart {
+            background-color: #10b981;
+            transition: background-color 0.2s;
+        }
+        .btn-add-cart:hover {
+            background-color: #059669;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="header p-4 shadow-lg sticky top-0 z-10">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+            <h1 class="text-3xl font-extrabold tracking-tight">CSDev Shop</h1>
+            
+            <div class="relative w-full sm:w-64 lg:w-96 mx-0 sm:mx-4">
+                <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Pesquisar celular..." 
+                    class="w-full pl-10 pr-4 py-2 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                <div class="absolute left-3 top-2.5 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('painel_admin') }}" class="text-sm font-medium hover:text-indigo-200 transition duration-150">
+                    Painel Admin
+                </a>
+                <button id="cart-btn" class="relative p-2 rounded-full bg-indigo-600 hover:bg-indigo-700 transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-white">
+                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                    <span id="cart-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 flex-grow">
+        <h2 class="text-4xl font-extrabold text-gray-900 mb-8 border-b-4 border-indigo-500 pb-2">
+            Produtos em Destaque
+        </h2>
+
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {% for produto in produtos %}
+            <div class="card bg-white rounded-xl overflow-hidden p-6 flex flex-col justify-between product-item">
+                <div>
+                    <h3 class="product-name text-xl font-bold text-gray-800 mb-2 truncate" title="{{ produto[1] }}">{{ produto[1] }}</h3>
+                    <p class="text-sm text-gray-500 mb-4 h-12 overflow-hidden">{{ produto[2] }}</p>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <span class="text-2xl font-bold text-indigo-600">
+                        R$ {{ "%.2f" % produto[3] }}
+                    </span>
+                    <button onclick="addToCart({{ produto[0] }}, '{{ produto[1] }}', {{ produto[3] }})" class="btn-add-cart text-white font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg transition duration-150">
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div id="no-results" class="hidden lg:col-span-4 text-center py-12 bg-white rounded-xl shadow-lg">
+                <p class="text-xl text-gray-600">Nenhum produto corresponde à sua pesquisa.</p>
+            </div>
+
+            {% if not produtos %}
+            <div class="lg:col-span-4 text-center py-12 bg-white rounded-xl shadow-lg">
+                <p class="text-xl text-gray-600">Nenhum produto cadastrado no momento.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white p-4 mt-8">
+        <div class="container mx-auto text-center text-sm">
+            <p>&copy; 2025 CSDev E-commerce. Desenvolvido por [Seu Nome].</p>
+        </div>
+    </footer>
+
+    <div id="cart-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-2xl font-bold text-gray-800">Seu Carrinho</h3>
+                <button onclick="toggleModal()" class="text-gray-500 hover:text-gray-700 text-3xl leading-none">&times;</button>
+            </div>
+            <div id="cart-items" class="space-y-4">
+                <p class="text-gray-500 text-center">O carrinho está vazio.</p>
+            </div>
+            <div class="mt-6 pt-4 border-t">
+                <p class="text-xl font-bold text-gray-800 flex justify-between">
+                    Total: <span id="cart-total" class="text-indigo-600">R$ 0,00</span>
+                </p>
+                <button class="w-full mt-4 btn-add-cart text-white font-semibold py-3 rounded-lg shadow-md hover:bg-green-700">
+                    Finalizar Compra
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+
+        function formatCurrency(value) {
+            return `R$ ${value.toFixed(2).replace('.', ',')}`;
+        }
+
+        // --- NOVA FUNÇÃO DE BUSCA ---
+        function filterProducts() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const products = document.getElementsByClassName('product-item');
+            const noResults = document.getElementById('no-results');
+            let hasVisibleProduct = false;
+
+            for (let i = 0; i < products.length; i++) {
+                const productName = products[i].querySelector('.product-name').innerText.toLowerCase();
+                if (productName.includes(searchTerm)) {
+                    products[i].style.display = "";
+                    hasVisibleProduct = true;
+                } else {
+                    products[i].style.display = "none";
+                }
+            }
+
+            // Mostra ou esconde a mensagem de "nada encontrado"
+            if (hasVisibleProduct) {
+                noResults.classList.add('hidden');
+            } else {
+                noResults.classList.remove('hidden');
+            }
+        }
+
+        function updateCartUI() {
+            const cartCountElement = document.getElementById('cart-count');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartTotalElement = document.getElementById('cart-total');
+
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCountElement.textContent = totalItems;
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotalElement.textContent = formatCurrency(total);
+
+            cartItemsContainer.innerHTML = '';
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">O carrinho está vazio.</p>';
+            } else {
+                cart.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'flex justify-between items-center p-3 bg-indigo-50 rounded-lg';
+                    itemDiv.innerHTML = `
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800">${item.name}</p>
+                            <p class="text-sm text-gray-600">${formatCurrency(item.price)} x ${item.quantity}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold text-indigo-700">${formatCurrency(item.price * item.quantity)}</span>
+                            <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-700 text-lg">&times;</button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(itemDiv);
+                });
+            }
+        }
+
+        function addToCart(id, name, price) {
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ id, name, price, quantity: 1 });
+            }
+            updateCartUI();
+        }
+
+        function removeFromCart(id) {
+            const existingItemIndex = cart.findIndex(item => item.id === id);
+            if (existingItemIndex > -1) {
+                if (cart[existingItemIndex].quantity > 1) {
+                    cart[existingItemIndex].quantity -= 1;
+                } else {
+                    cart.splice(existingItemIndex, 1);
+                }
+            }
+            updateCartUI();
+        }
+
+        function toggleModal() {
+            const modal = document.getElementById('cart-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        document.getElementById('cart-btn').addEventListener('click', toggleModal);
+        
+        window.onload = function() {
+            updateCartUI();
+        }
+    </script>
+</body>
+</html>
